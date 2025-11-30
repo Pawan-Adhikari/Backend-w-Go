@@ -1,20 +1,20 @@
 package main
 import "fmt"
-import "sort"
-import "strconv"
+import "math"
+
+
+type Point struct {
+    x float64
+    y float64
+}
+
+func (p Point) DistToOrig() float64 {
+    t := math.Pow(p.x, 2) + math.Pow(p.y, 2)
+    return math.Sqrt(t)
+}
 
 func main() {
-	int_slice := make([]int, 3)
-	var input_str string
-	var input_int int
-	for (input_str != "X") {
-		fmt.Println("Enter an integer to append (or 'X' to exit): ")
-		fmt.Scan(&input_str)
-		input_int, _ = strconv.Atoi(input_str)
-		int_slice = append(int_slice, input_int)
-	}
-	
-	sort.Ints(int_slice)
-
-    fmt.Printf("Sorted slice: %v\n", int_slice)
+    p1 := Point{3,4}
+    fmt.Println(p1.DistToOrig())
 }
+
