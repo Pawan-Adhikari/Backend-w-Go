@@ -1,0 +1,13 @@
+# Ignore auto-generated or misleading files
+*.html linguist-detectable=false
+*.json linguist-detectable=false
+*.xml linguist-detectable=false
+*.md linguist-detectable=false
+
+# Force correct language classification
+*.ipynb linguist-language=Jupyter Notebook
+*.cpp linguist-language=C++
+*.cc linguist-language=C++
+*.go linguist-language=Go
+*.rs linguist-language=Rust
+*.py linguist-language=Python
