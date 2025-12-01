@@ -8,22 +8,27 @@ from datetime import date
 import subprocess
 import configparser
 import re
+import sys
+import os
 
 
 #Initiation:
 config = configparser.ConfigParser()
-config.read('config_tshoRolpa.ini')
+script_dir = os.path.dirname(os.path.abspath(__file__))
+config.read(os.path.join(script_dir, 'config_tshoRolpa.ini'))
+
 start_date=config.get('Other','last_product_date')
 usr = config.get('Login','user')
 pas = config.get('Login','password')
 wkt = config.get('Other','wkt')   
-loc=config.get('Other','store_location')
 
-today=date.today()
-end_date = today
+loc = Path(script_dir)/"Response"/"tshoRolpa"/"Backup"
+geojsonPath = Path(script_dir)/"Response"/"tshoRolpa"/ "tshoRolpaAOI.geojson"
+end_date = date.today()
+
 if (start_date==str(end_date)):
-    print("Scanned just today!!")
-    exit()
+    #print("Scanned just today!!")
+    sys.exit(2)
 
 #Searching:
 results = asf.geo_search(intersectsWith=wkt,
@@ -35,42 +40,44 @@ results = asf.geo_search(intersectsWith=wkt,
 
 #Crash if no results found
 if not results:
-    print("No scenes found. Exiting.")
-    exit()
+    #print("No scenes found. Exiting.")
+    sys.exit(3)
 
 
 #Display found products:
 first_result = results[0]
-print(first_result)
+#print(first_result)
 
 
 #Choosing _VV.tif files to download:
 date = re.sub("T.*", "", first_result.properties['startTime'])
 url = first_result.properties['additionalUrls'][2]
-tifPath = loc + date + "/" + date + '.tif'
-tifDir = loc + date
+tifPath = loc / date / f"{date}.tif"
+tifDir = loc / date
+
 
 
 #Creating directiory to store backup:
-Path(tifDir).mkdir(exist_ok=True)
+tifDir.mkdir(exist_ok=True)
 
 
 #Download:
 subprocess.run([
-    "wget", "-O", tifPath, "-c", url
+    "wget", "-O", str(tifPath), "-c", url
 ])
 
 
 #Preprocessing:
-tifPathCropped = crop(tifPath, "./Response/tshoRolpa/tshoRolpaAOI.geojson", tifDir)
+tifPathCropped = crop(tifPath, geojsonPath, tifDir)
 tifPathPadded = pad(tifPathCropped, tifDir)
 tifPathNormalized = normalize_leefilter(tifPathPadded, tifDir)
 
 
-#Final Copy:
-finalPath = '../public/data/TshoRolpa/'
-finalTIFF = finalPath + tifPathNormalized.name
-finalPNG = finalPath + tifPathNormalized.stem + ".png"
+#Final Copy:    
+finalPath = Path(script_dir).parent / "public" / "data" / "TshoRolpa"
+finalPath.mkdir(exist_ok=True)
+finalTIFF = finalPath / tifPathNormalized.name
+finalPNG = finalPath / (str(tifPathNormalized.stem) + ".png")
 subprocess.run(["cp", tifPathNormalized, finalPath])
 subprocess.run(["gdal_translate", "-of", "PNG", str(finalTIFF), str(finalPNG)])
 
@@ -78,5 +85,5 @@ subprocess.run(["gdal_translate", "-of", "PNG", str(finalTIFF), str(finalPNG)])
 #Finalization:
 config['Other']['last_product_date'] = date
 
-with open('config_tshoRolpa.ini', 'w') as configfile:
+with open(os.path.join(script_dir, 'config_tshoRolpa.ini'), 'w') as configfile:
     config.write(configfile)

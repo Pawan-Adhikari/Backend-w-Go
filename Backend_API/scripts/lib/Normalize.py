@@ -93,7 +93,6 @@ def normalize_leefilter(input_tif, outDir):
             with rasterio.open(output_tif_path, 'w', **profile) as dst:
                 dst.write(equalized_data.astype(rasterio.uint8), 1)
 
-        print(f"Successfully processed '{input_tif}' -> '{output_tif_path}'.")
 
     except rasterio.RasterioIOError as e:
         print(f"Rasterio error: Could not open or process '{input_tif}'. Error: {e}")

@@ -1,0 +1,5 @@
+asf_search==9.0.3
+rasterio==1.4.3
+numpy==2.2.6
+GDAL==3.11.4
+scipy==1.16.0

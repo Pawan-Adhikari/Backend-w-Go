@@ -45,8 +45,6 @@ def pad(input_tif, outDir, target_size=(256, 256)):
         with rasterio.open(output_tif_path, 'w', **profile) as dst:
             dst.write(padded_img_array, 1)
 
-        print(f"Padded GeoTIFF saved successfully to {output_tif_path}")
-
     except Exception as e:
         print(f"An error occurred: {e}")
     return output_tif_path
