@@ -35,7 +35,7 @@ func runScript() {
 
 func main(){
 	c := cron.New()
-	c.AddFunc("@every 30s", runScript)
+	c.AddFunc("@daily", runScript)
 	c.Start()
 	fmt.Println("Cronjob initialised, will start job periodically!")
 	select {} //Block the program forever

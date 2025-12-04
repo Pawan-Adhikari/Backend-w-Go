@@ -1,12 +1,21 @@
-    FROM alpine:latest
+FROM alpine:latest
 
-    #RUN apt-get update 
+#RUN apt-get update 
 
-    WORKDIR /app
+WORKDIR /app
 
-    COPY ./api ./
+COPY ./api ./
 
-    RUN mkdir -p public/data/TshoRolpa/
-    RUN chmod +x ./api
+RUN mkdir -p public/data/TshoRolpa/
+RUN chmod +x ./api
 
-    CMD ["./api"]
+CMD ["./api"]
+
+
+#docker build --file Dockerfile.api -t tshorolpa-api .
+#docker run -d \
+#            --restart unless-stopped \
+#            -p 127.0.0.1:8080:8080 \
+#            -v $(pwd)/public/:/app/public/ \
+#            tshorolpa-api
+
