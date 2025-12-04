@@ -4,7 +4,7 @@ from pathlib import Path
 from lib.Normalize import normalize_leefilter
 from lib.Padding import pad
 from lib.Cropping import crop
-from datetime import date
+from datetime import date, datetime, timedelta
 import subprocess
 import configparser
 import re
@@ -26,6 +26,8 @@ loc = Path(script_dir)/"Response"/"tshoRolpa"/"Backup"
 geojsonPath = Path(script_dir)/"Response"/"tshoRolpa"/ "tshoRolpaAOI.geojson"
 end_date = date.today()
 
+print("start_date:", start_date, "end_date:", end_date)
+
 if (start_date==str(end_date)):
     #print("Scanned just today!!")
     sys.exit(2)
@@ -37,6 +39,7 @@ results = asf.geo_search(intersectsWith=wkt,
                         start=start_date,
                         end=end_date)
 
+print("No of results:", len(results))
 
 #Crash if no results found
 if not results:
@@ -63,8 +66,11 @@ tifDir.mkdir(exist_ok=True)
 
 #Download:
 subprocess.run([
-    "wget", "-O", str(tifPath), "-c", url
-])
+    "wget",
+    "-O", str(tifPath),
+    "-c",
+    url
+], check=True)
 
 
 #Preprocessing:
@@ -76,14 +82,27 @@ tifPathNormalized = normalize_leefilter(tifPathPadded, tifDir)
 #Final Copy:    
 finalPath = Path(script_dir).parent / "public" / "data" / "TshoRolpa"
 finalPath.mkdir(exist_ok=True)
-finalTIFF = finalPath / tifPathNormalized.name
-finalPNG = finalPath / (str(tifPathNormalized.stem) + ".png")
-subprocess.run(["cp", tifPathNormalized, finalPath])
+finalTIFF = finalPath / f"{date}.tiff"
+finalPNG = finalPath / f"{date}.png"
+subprocess.run(["cp", tifPathNormalized, finalTIFF])
 subprocess.run(["gdal_translate", "-of", "PNG", str(finalTIFF), str(finalPNG)])
 
 
 #Finalization:
-config['Other']['last_product_date'] = date
+# 1. Parse the date string (YYYY-MM-DD) into a datetime object
+processed_date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+
+# 2. Add one day
+next_start_date_obj = processed_date_obj + timedelta(days=1)
+
+# 3. Convert back to string
+next_start_date_str = next_start_date_obj.strftime('%Y-%m-%d')
+
+config['Other']['last_product_date'] = next_start_date_str
 
 with open(os.path.join(script_dir, 'config_tshoRolpa.ini'), 'w') as configfile:
     config.write(configfile)
+
+with open(finalPath/"date.txt", 'w') as dateFile:
+    dateFile.write(date)
+

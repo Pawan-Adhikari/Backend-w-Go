@@ -1,0 +1,12 @@
+    FROM alpine:latest
+
+    #RUN apt-get update 
+
+    WORKDIR /app
+
+    COPY ./api ./
+
+    RUN mkdir -p public/data/TshoRolpa/
+    RUN chmod +x ./api
+
+    CMD ["./api"]

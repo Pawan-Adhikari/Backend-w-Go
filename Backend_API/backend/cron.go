@@ -9,7 +9,7 @@ import (
 func runScript() {
 	scriptPath := filepath.Join("scripts" , "tshoRolpa.py")
 	cmd := exec.Command("python3", scriptPath)
-	fmt.Println("Running the script at:",scriptPath, "Now!")
+	fmt.Println("Running the script at:",scriptPath, "now!")
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
@@ -28,13 +28,14 @@ func runScript() {
 	} else {
 		fmt.Println("Script ran without any error!")
 	}
-	_ = output
+	//_ = output
+	fmt.Println("Output:", string(output))
 	
 }
 
 func main(){
 	c := cron.New()
-	c.AddFunc("@daily", runScript)
+	c.AddFunc("@every 30s", runScript)
 	c.Start()
 	fmt.Println("Cronjob initialised, will start job periodically!")
 	select {} //Block the program forever
